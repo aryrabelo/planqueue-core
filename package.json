@@ -18,8 +18,22 @@
 		"notes",
 		"scratchpad",
 		"statusline",
-		"prompt-queue"
+		"prompt-queue",
+		"session-notes",
+		"ai-agent",
+		"claude",
+		"claude-code",
+		"oh-my-pi",
+		"omp",
+		"markdown",
+		"checkbox",
+		"widget",
+		"terminal"
 	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"sideEffects": false,
 	"exports": {
 		".": "./src/index.ts"
 	},

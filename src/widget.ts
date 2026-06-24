@@ -188,7 +188,24 @@ export function renderWidgetLines(
 	return [...head, ...body, footer].slice(0, maxLines);
 }
 
-/** Body lines for the widget: indented empty-hint, or the done-capped tail of the note. */
+/**
+ * Find the first in-flight or pending task index (with its continuation block).
+ * Returns the line index, or -1 when none found.
+ */
+function findActiveIndex(lines: string[]): number {
+	for (let i = 0; i < lines.length; i++) {
+		const { state } = parseTaskLine(lines[i] ?? "");
+		if (state === "inflight" || state === "pending") return i;
+	}
+	return -1;
+}
+
+/**
+ * Body lines for the widget: when the note overflows the budget, window from
+ * the first in-flight/pending task downward so the active area is always visible.
+ * A `# heading` on line 0 is preserved as the first row when the window would
+ * otherwise skip it.
+ */
 function renderWidgetBody(
 	trimmed: string,
 	bodyBudget: number,
@@ -200,6 +217,19 @@ function renderWidgetBody(
 	if (trimmed.length === 0)
 		return [style.indent + style.hint(emptyHint ?? EMPTY_HINT)];
 	const capped = collapseDoneBlocks(trimmed.split("\n"), Math.max(0, maxDone));
-	const tail = capped.slice(Math.max(capped.length - bodyBudget, 0));
-	return renderBody(tail, style);
+	if (capped.length <= bodyBudget) return renderBody(capped, style);
+
+	const active = findActiveIndex(capped);
+	// Nothing actionable → fall back to showing the tail.
+	if (active === -1) {
+		return renderBody(capped.slice(capped.length - bodyBudget), style);
+	}
+
+	// Preserve a heading on line 0 when the active task is further down.
+	const hasHeading = active > 0 && /^#{1,6}\s/.test(capped[0] ?? "");
+	const reserved = hasHeading ? 1 : 0;
+	const windowBudget = bodyBudget - reserved;
+	const window = capped.slice(active, active + windowBudget);
+	const head = hasHeading ? [capped[0] ?? ""] : [];
+	return renderBody([...head, ...window], style);
 }

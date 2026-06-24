@@ -236,3 +236,47 @@ describe("renderWidgetLines — multi-line continuation", () => {
 		]);
 	});
 });
+
+describe("renderWidgetLines — active-task windowing", () => {
+	test("windows from the first pending task when the note overflows", () => {
+		const note =
+			"- [x] done1\n- [x] done2\n- [x] done3\n- [x] done4\n- [ ] next\n- [ ] later";
+		// maxDone=2 keeps done3+done4; maxLines=4 (title=0, hint=1 → budget=3).
+		// Active is "next" → window starts there.
+		const result = renderWidgetLines(note, { maxLines: 4, maxDone: 2 });
+		expect(result).toEqual(["☐ next", "☐ later", SHORTCUT_HINT]);
+	});
+
+	test("windows from the in-flight task when present", () => {
+		const note =
+			"- [x] a\n- [x] b\n- [x] c\n- [>] running\n- [ ] queued\n- [ ] more";
+		const result = renderWidgetLines(note, { maxLines: 4, maxDone: 1 });
+		expect(result).toEqual(["▸ running", "☐ queued", "☐ more", SHORTCUT_HINT]);
+	});
+
+	test("preserves # heading when active task is further down", () => {
+		const note =
+			"# My Task\n- [x] a\n- [x] b\n- [ ] pending1\n- [ ] pending2\n- [ ] pending3";
+		// maxLines=5 → budget=4; heading takes 1, window gets 3.
+		const result = renderWidgetLines(note, { maxLines: 5, maxDone: 0 });
+		expect(result).toEqual([
+			"# My Task",
+			"☐ pending1",
+			"☐ pending2",
+			"☐ pending3",
+			SHORTCUT_HINT,
+		]);
+	});
+
+	test("falls back to tail when no actionable task exists", () => {
+		const note = "- [x] a\n- [x] b\n- [x] c\nsome prose";
+		const result = renderWidgetLines(note, { maxLines: 4, maxDone: 2 });
+		expect(result).toEqual(["✓ b", "✓ c", "some prose", SHORTCUT_HINT]);
+	});
+
+	test("fits entirely when under budget — no windowing", () => {
+		const note = "- [ ] a\n- [ ] b";
+		const result = renderWidgetLines(note, { maxLines: 10 });
+		expect(result).toEqual(["☐ a", "☐ b", SHORTCUT_HINT]);
+	});
+});
