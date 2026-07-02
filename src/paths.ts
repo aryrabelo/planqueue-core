@@ -1,20 +1,27 @@
 /**
- * Pure path derivation for free-text session notes.
+ * Pure path derivation for PlanQueue session notes.
  *
  * No filesystem, no git, no TUI — all inputs are passed in so this module is
  * fully unit-testable. The owning extension (`main.ts`) fetches the raw git /
  * session values and feeds them here.
  *
- * Target layout: `~/.free-text/{repo}/{branch}/{session-id}.md`
+ * Target layout: `~/.planqueue/{repo}/{branch}/{session-id}.md`
  */
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 
 /** Top-level directory under the user's home where all notes live. */
-export const ROOT_DIR_NAME = ".free-text";
+export const ROOT_DIR_NAME = ".planqueue";
 
-/** Previous root, still read for back-compat with existing Oh My Pi notes. */
-export const LEGACY_ROOT_DIR_NAME = ".omp-free-text";
+/**
+ * Previous roots, read for back-compat, newest legacy first: `.free-text`
+ * (pre-rename) then `.omp-free-text` (original Oh My Pi root). New writes always
+ * go to {@link ROOT_DIR_NAME}; these are read-only fallbacks.
+ */
+export const LEGACY_ROOT_DIR_NAMES: readonly string[] = [
+	".free-text",
+	".omp-free-text",
+];
 
 /**
  * Make an arbitrary string safe to use as a single filesystem path segment.
@@ -109,26 +116,35 @@ export function configPathFor(home: string = homedir()): string {
 	return join(home, ROOT_DIR_NAME, "config.json");
 }
 
-/** Note path under the legacy root, for read-only back-compat. */
-export function legacyNotePathFor(
+/**
+ * Note paths under each legacy root, newest legacy first, for read-only
+ * back-compat with notes created before the root migration.
+ */
+export function legacyNotePathsFor(
 	loc: ResolvedLocation,
 	home: string = homedir(),
-): string {
-	return join(
-		home,
-		LEGACY_ROOT_DIR_NAME,
-		loc.repo,
-		loc.branch,
-		`${loc.sessionId}.md`,
+): string[] {
+	return LEGACY_ROOT_DIR_NAMES.map((root) =>
+		join(home, root, loc.repo, loc.branch, `${loc.sessionId}.md`),
 	);
 }
 
-/** Legacy sessions dir, for merging old notes into the cross-session browser. */
-export function legacySessionsDirFor(
+/**
+ * Legacy sessions dirs, newest legacy first, for merging old notes into the
+ * cross-session browser.
+ */
+export function legacySessionsDirsFor(
 	loc: ResolvedLocation,
 	home: string = homedir(),
-): string {
-	return join(home, LEGACY_ROOT_DIR_NAME, loc.repo, loc.branch);
+): string[] {
+	return LEGACY_ROOT_DIR_NAMES.map((root) =>
+		join(home, root, loc.repo, loc.branch),
+	);
+}
+
+/** Config file paths under each legacy root, newest legacy first, read-only. */
+export function legacyConfigPathsFor(home: string = homedir()): string[] {
+	return LEGACY_ROOT_DIR_NAMES.map((root) => join(home, root, "config.json"));
 }
 
 /** Per repo/branch pointer file naming the session id of the "current" note. */

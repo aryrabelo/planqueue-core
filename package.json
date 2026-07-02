@@ -1,20 +1,20 @@
 {
-	"name": "@aryrabelo/free-text-core",
+	"name": "@aryrabelo/planqueue-core",
 	"version": "0.1.0",
-	"description": "Pure logic for AI agent session notes — designed for Bun, bundler-compatible with Node.js. Path scheme, persistence, markdown prompt-queue, line rendering, and a generic stats line.",
+	"description": "Pure logic for PlanQueue — AI agent session notes with a markdown prompt queue. Designed for Bun, bundler-compatible with Node.js. Path scheme, persistence, queue state machine, line rendering, and a generic stats line.",
 	"type": "module",
 	"license": "MIT",
 	"author": "Ary Rabelo",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/aryrabelo/free-text-core.git"
+		"url": "git+https://github.com/aryrabelo/planqueue-core.git"
 	},
-	"homepage": "https://github.com/aryrabelo/free-text-core#readme",
+	"homepage": "https://github.com/aryrabelo/planqueue-core#readme",
 	"bugs": {
-		"url": "https://github.com/aryrabelo/free-text-core/issues"
+		"url": "https://github.com/aryrabelo/planqueue-core/issues"
 	},
 	"keywords": [
-		"free-text",
+		"planqueue",
 		"notes",
 		"scratchpad",
 		"statusline",

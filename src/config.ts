@@ -1,5 +1,5 @@
 /**
- * Pure shortcut config parsing for omp-free-text.
+ * Pure shortcut config parsing for PlanQueue.
  *
  * No imports — this module is stateless pure string/JSON logic.
  * The caller (main.ts, via store.ts) supplies the raw file text.

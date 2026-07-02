@@ -1,5 +1,5 @@
 /**
- * Persistence for free-text notes: read/write the markdown file and a small
+ * Persistence for PlanQueue notes: read/write the markdown file and a small
  * debounced saver so rapid updates coalesce into one write.
  */
 import {
@@ -179,12 +179,21 @@ export async function readCurrentPointer(dir: string): Promise<string> {
 	}
 }
 
-/** Load `newPath`, falling back to `legacyPath` when the new note does not exist yet. */
+/**
+ * Read `newPath`, else fall through `legacyPaths` in order (first non-empty
+ * wins); "" when the file exists at no root. Content-agnostic, so it also backs
+ * the config new-then-legacy read.
+ */
 export async function loadNoteWithFallback(
 	newPath: string,
-	legacyPath: string,
+	legacyPaths: readonly string[],
 ): Promise<string> {
 	const fresh = await loadNote(newPath);
 	if (fresh !== "") return fresh;
-	return loadNote(legacyPath);
+	for (const path of legacyPaths) {
+		// ponytail: sequential — a short read-fallback chain, not a hot loop.
+		const legacy = await loadNote(path);
+		if (legacy !== "") return legacy;
+	}
+	return "";
 }

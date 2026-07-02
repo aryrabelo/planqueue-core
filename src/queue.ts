@@ -1,5 +1,5 @@
 /**
- * Pure parsing of the free-text note as a prompt queue (checkbox model).
+ * Pure parsing of the PlanQueue note as a prompt queue (checkbox model).
  *
  * No OMP / fs / TUI imports. The note IS the queue: lines are read top-to-bottom
  * (FIFO). A `- [ ] text` line is PENDING; `- [>] text` is IN-FLIGHT; `- [x] text`

@@ -5,7 +5,9 @@ test("public surface is exported", () => {
 	for (const name of [
 		"resolveLocation",
 		"notePathFor",
-		"legacyNotePathFor",
+		"legacyNotePathsFor",
+		"legacySessionsDirsFor",
+		"legacyConfigPathsFor",
 		"currentPointerPathFor",
 		"loadNote",
 		"saveNote",

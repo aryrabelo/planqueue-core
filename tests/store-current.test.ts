@@ -23,11 +23,11 @@ test("loadNoteWithFallback prefers new path, falls back to legacy", async () => 
 	const dir = await mkdtemp(join(tmpdir(), "ft-"));
 	const legacy = join(dir, "legacy.md");
 	await writeFile(legacy, "old note", "utf8");
-	expect(await loadNoteWithFallback(join(dir, "new.md"), legacy)).toBe(
+	expect(await loadNoteWithFallback(join(dir, "new.md"), [legacy])).toBe(
 		"old note",
 	);
 	await writeFile(join(dir, "new.md"), "new note", "utf8");
-	expect(await loadNoteWithFallback(join(dir, "new.md"), legacy)).toBe(
+	expect(await loadNoteWithFallback(join(dir, "new.md"), [legacy])).toBe(
 		"new note",
 	);
 });

@@ -15,13 +15,14 @@ import {
 	listNotes,
 	loadConfigText,
 	loadNote,
+	loadNoteWithFallback,
 	saveNote,
 } from "../src/store";
 
 let dir: string;
 
 beforeEach(async () => {
-	dir = await mkdtemp(join(tmpdir(), "omp-free-text-"));
+	dir = await mkdtemp(join(tmpdir(), "planqueue-"));
 });
 
 afterEach(async () => {
@@ -130,5 +131,46 @@ describe("loadConfigText", () => {
 		const p = join(dir, "config.json");
 		await writeFile(p, '{"shortcuts":{}}', "utf8");
 		expect(await loadConfigText(p)).toBe('{"shortcuts":{}}');
+	});
+});
+
+describe("loadNoteWithFallback", () => {
+	test("returns the new note when it exists (legacy roots ignored)", async () => {
+		const newPath = join(dir, "new.md");
+		const legacy = [join(dir, "legacy-a.md"), join(dir, "legacy-b.md")];
+		await saveNote(newPath, "new");
+		await saveNote(legacy[0] as string, "a");
+		await saveNote(legacy[1] as string, "b");
+		expect(await loadNoteWithFallback(newPath, legacy)).toBe("new");
+	});
+
+	test("falls through legacy roots in order, first non-empty wins", async () => {
+		const newPath = join(dir, "new.md");
+		const legacy = [join(dir, "legacy-a.md"), join(dir, "legacy-b.md")];
+		await saveNote(legacy[0] as string, "a");
+		await saveNote(legacy[1] as string, "b");
+		expect(await loadNoteWithFallback(newPath, legacy)).toBe("a");
+	});
+
+	test("uses a later legacy root when earlier ones are absent", async () => {
+		const newPath = join(dir, "new.md");
+		const legacy = [join(dir, "legacy-a.md"), join(dir, "legacy-b.md")];
+		await saveNote(legacy[1] as string, "b");
+		expect(await loadNoteWithFallback(newPath, legacy)).toBe("b");
+	});
+
+	test("returns '' when the note exists at no root", async () => {
+		expect(
+			await loadNoteWithFallback(join(dir, "new.md"), [
+				join(dir, "legacy-a.md"),
+			]),
+		).toBe("");
+	});
+
+	test("empty legacy chain still resolves the new note or ''", async () => {
+		const newPath = join(dir, "new.md");
+		expect(await loadNoteWithFallback(newPath, [])).toBe("");
+		await saveNote(newPath, "hi");
+		expect(await loadNoteWithFallback(newPath, [])).toBe("hi");
 	});
 });

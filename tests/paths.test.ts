@@ -92,7 +92,7 @@ describe("resolveLocation", () => {
 });
 
 describe("notePathFor", () => {
-	test("builds ~/.free-text/{repo}/{branch}/{session}.md under the given home", () => {
+	test("builds ~/.planqueue/{repo}/{branch}/{session}.md under the given home", () => {
 		const path = notePathFor(
 			{ repo: "proj", branch: "main", sessionId: "abc" },
 			"/home/u",
@@ -102,7 +102,7 @@ describe("notePathFor", () => {
 });
 
 describe("historyPathFor", () => {
-	test("builds ~/.free-text/{repo}/{branch}/{session}.history.md under the given home", () => {
+	test("builds ~/.planqueue/{repo}/{branch}/{session}.history.md under the given home", () => {
 		const path = historyPathFor(
 			{ repo: "proj", branch: "main", sessionId: "abc" },
 			"/home/u",
@@ -125,7 +125,7 @@ describe("sessionsDirFor", () => {
 });
 
 describe("configPathFor", () => {
-	test("returns ~/.free-text/config.json under the given home", () => {
+	test("returns ~/.planqueue/config.json under the given home", () => {
 		expect(configPathFor("/home/u")).toBe(
 			join("/home/u", ROOT_DIR_NAME, "config.json"),
 		);
